@@ -44,4 +44,6 @@
       limpiarCanvas();
       dibujarTablero2();
     }
+
+
     
