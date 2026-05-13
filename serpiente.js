@@ -11,9 +11,6 @@ let direccionActual = "derecha";
 // Tamaño en píxeles de cada celda del tablero
 const TAMANIO_CELDA = 25
 
-// Array con la posición de la comida en el tablero (coordenadas de celda, no píxeles)
-let comida = [{x:5,y:5}]
-
 // Array con las posiciones de cada segmento de la serpiente (cabeza primero)
 const SERPIENTE = [
   { x: 14, y: 13 }, // cabeza
@@ -22,6 +19,15 @@ const SERPIENTE = [
   { x: 14, y: 16 }  // cola
 ]
 
+let posicionComida = {x:5,y:5}
+
+let contadorPuntos = 0;
+
+function sumarPuntos(puntos){
+  contadorPuntos++;
+  let etiquetaPuntaje = document.getElementById("puntaje")
+  etiquetaPuntaje.innerHTML = contadorPuntos;
+}
 // Dibujamos el estado inicial del juego al cargar la página
 dibujarTodo();
 
@@ -34,7 +40,7 @@ function dibujarTodo() {
   limpiarCanvas();    // Borra todo lo que había
   dibujarTablero();   // Pinta la cuadrícula con números
   dibujarSerpiente(); // Pinta la serpiente encima
-  dibujarComida();    // Pinta la comida encima
+  pintarComida();     //Pinta la comida
 }
 
 // Borra completamente el canvas de esquina a esquina
@@ -96,18 +102,26 @@ function dibujarNumerosEnX(){
 }
 
 // Pinta un cuadrado de color en la celda indicada por coordenadas de cuadrícula (no píxeles)
-function pintarCoordenada(x, y, color){
+//Corregí el tema de los parametros, ya no recibe 3, solo recibe los dos que se suponía que debía de recibir
+//si no estoy mal se refería a esta función
+function pintarCoordenada(x, y){
   // Convertimos coordenadas de celda a píxeles reales en el canvas
   let posicionX = x * TAMANIO_CELDA
   let posicionY = y * TAMANIO_CELDA
 
   // Solo pintamos si la celda está dentro de los límites del canvas
   if (posicionX < canvas.width && posicionY < canvas.height){
-    ctx.fillStyle = color  // Color de relleno del cuadrado
-    // Dibuja el cuadrado relleno del tamaño de una celda
+    //Acá lo que se ara con el if anidado es que si es la cabeza de la serpiente (por el tamaño del arreglo), quiero que
+    //se pinte de verde la cabeza
+    if(x === SERPIENTE[0].x && y === SERPIENTE[0].y){
+      ctx.fillStyle = "green"
+    }else if(x === posicionComida.x && y === posicionComida.y){
+      ctx.fillStyle ="red"//color de la comida
+    }else{
+      ctx.fillStyle = "blue"//color del cuerpo  
+    }
     ctx.fillRect(posicionX, posicionY, TAMANIO_CELDA, TAMANIO_CELDA)
-
-    ctx.strokeStyle = "red"  // Color del borde: rojo
+    ctx.strokeStyle = "red" //color del borde
     // Dibuja el borde del cuadrado encima del relleno
     ctx.strokeRect(posicionX, posicionY, TAMANIO_CELDA, TAMANIO_CELDA)
   }
@@ -160,7 +174,13 @@ function moverDerecha(){
   // Insertamos la nueva cabeza al principio del array
   SERPIENTE.unshift(nuevoElemento)
   // Eliminamos el último elemento (la cola), manteniendo el mismo tamaño
-  SERPIENTE.pop()
+  if(atraparComida() == true){
+    sumarPuntos();
+    posicionComida.x = Math.floor(Math.random()*(canvas.width/TAMANIO_CELDA));
+    posicionComida.y = Math.floor(Math.random()*(canvas.height/TAMANIO_CELDA));
+  }else{
+    SERPIENTE.pop()
+  }
 }
 
 // Mueve la serpiente un paso hacia la izquierda
@@ -175,7 +195,13 @@ function moverIzquierda(){
   nuevoElemento.y = SERPIENTE[0].y
   // Insertamos la nueva cabeza al principio y eliminamos la cola
   SERPIENTE.unshift(nuevoElemento)
-  SERPIENTE.pop()
+  if(atraparComida() == true){
+    sumarPuntos();
+    posicionComida.x = Math.floor(Math.random()*(canvas.width/TAMANIO_CELDA));
+    posicionComida.y = Math.floor(Math.random()*(canvas.height/TAMANIO_CELDA));
+  }else{
+    SERPIENTE.pop()
+  }
 }
 
 // Mueve la serpiente un paso hacia abajo
@@ -190,7 +216,13 @@ function moverAbajo(){
   nuevoElemento.y = SERPIENTE[0].y + 1
   // Insertamos la nueva cabeza al principio y eliminamos la cola
   SERPIENTE.unshift(nuevoElemento)
-  SERPIENTE.pop()
+  if(atraparComida() == true){
+    sumarPuntos()
+    posicionComida.x = Math.floor(Math.random()*(canvas.width/TAMANIO_CELDA));
+    posicionComida.y = Math.floor(Math.random()*(canvas.height/TAMANIO_CELDA));
+  }else{
+    SERPIENTE.pop()
+  }
 }
 
 // Mueve la serpiente un paso hacia arriba
@@ -205,7 +237,14 @@ function moverArriba(){
   nuevoElemento.y = SERPIENTE[0].y - 1
   // Insertamos la nueva cabeza al principio y eliminamos la cola
   SERPIENTE.unshift(nuevoElemento)
-  SERPIENTE.pop()
+
+  if(atraparComida() == true){
+    sumarPuntos();
+    posicionComida.x = Math.floor(Math.random()*(canvas.width/TAMANIO_CELDA));
+    posicionComida.y = Math.floor(Math.random()*(canvas.height/TAMANIO_CELDA));
+  }else{
+    SERPIENTE.pop()
+  }
 }
 
 // Arranca el juego: empieza a llamar a moverSerpiente cada 500ms (2 veces por segundo)
@@ -222,8 +261,19 @@ function pausarJuego(){
 function cambiarDireccion(direccion){
   direccionActual = direccion;
 }
+//Ahora si pinta correctamente la comida de manera aleatoria, el problema era que multiplicaba directamente con el canvas
+//había que encerrar la división entre paréntesis
+function pintarComida(){
+    pintarCoordenada(posicionComida.x,posicionComida.y)
+}
+//verificando el código el botón de pausa funciona correctamente junto al de iniciar
 
-// Pinta la comida en su posición actual del array comida (coordenada de celda, no píxeles)
-function dibujarComida(){
-  pintarCoordenada(comida[0].x, comida[0].y, "red"); // La comida se pinta en rojo
+//Ahora toca hacer la función de atraparComida
+
+function atraparComida(){
+  if(SERPIENTE[0].x === posicionComida.x && SERPIENTE[0].y === posicionComida.y){
+    return true;
+  }else{
+    return false;
+  }
 }
