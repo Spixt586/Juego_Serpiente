@@ -6,13 +6,13 @@ const ctx = canvas.getContext("2d");
 // Variable que guardará el identificador del intervalo del juego (para poder pausarlo)
 let intervaloSerpiente;
 // Dirección actual hacia donde se mueve la serpiente
-let direccionActual = "derecha";
+let direccionActual = "arriba";
 
 // Tamaño en píxeles de cada celda del tablero
 const TAMANIO_CELDA = 25
 
 // Array con las posiciones de cada segmento de la serpiente (cabeza primero)
-const SERPIENTE = [
+let SERPIENTE = [
   { x: 14, y: 13 }, // cabeza
   { x: 14, y: 14 },
   { x: 14, y: 15 },
@@ -25,8 +25,15 @@ let contadorPuntos = 0;
 
 let juegoTerminado = false;
 
+let velocidadSerpiente = 300;
+
 function sumarPuntos(puntos){
   contadorPuntos++;
+  if(contadorPuntos % 2 == 0 && velocidadSerpiente <= 800){
+    velocidadSerpiente += 200;
+    clearInterval(intervaloSerpiente)
+    intervaloSerpiente = setInterval(moverSerpiente,1000 - velocidadSerpiente);
+  }
   let etiquetaPuntaje = document.getElementById("puntaje")
   etiquetaPuntaje.innerHTML = contadorPuntos;
 }
@@ -135,9 +142,9 @@ function dibujarSerpiente(){
   for(let i = 0; i < SERPIENTE.length; i++){
     let serp = SERPIENTE[i]
     if(i == 0){
-      pintarCoordenada(serp.x, serp.y, colorCabeza) // Cabeza en verde
+      pintarCoordenada(serp.x, serp.y) // Cabeza en verde
     } else {
-      pintarCoordenada(serp.x, serp.y, "blue")      // Cuerpo en azul
+      pintarCoordenada(serp.x, serp.y)      // Cuerpo en azul
     }
   }
 }
@@ -263,7 +270,7 @@ function moverArriba(){
 
 // Arranca el juego: empieza a llamar a moverSerpiente cada 500ms (2 veces por segundo)
 function iniciarJuego(){
-  intervaloSerpiente = setInterval(moverSerpiente, 500);
+  intervaloSerpiente = setInterval(moverSerpiente, 1000 - velocidadSerpiente);
   cambiarEstado("Jugando");
 }
 
@@ -304,5 +311,20 @@ function gameOver(){
 }
 
 function reiniciarJuego(){
-  
+  limpiarCanvas();
+  dibujarTablero();
+  SERPIENTE = [
+    { x: 14, y: 13 }, // cabeza
+    { x: 14, y: 14 },
+    { x: 14, y: 15 },
+    { x: 14, y: 16 }  // cola
+  ]
+  contadorPuntos = 0
+  direccionActual = "arriba"
+  cambiarEstado("Listo");
+  juegoTerminado = false
+  pintarComida();
+  dibujarSerpiente();
+  clearInterval(intervaloSerpiente)
 }
+
