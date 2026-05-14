@@ -23,6 +23,8 @@ let posicionComida = {x:5,y:5}
 
 let contadorPuntos = 0;
 
+let juegoTerminado = false;
+
 function sumarPuntos(puntos){
   contadorPuntos++;
   let etiquetaPuntaje = document.getElementById("puntaje")
@@ -158,6 +160,9 @@ moverSerpiente = function(){
       moverArriba()
       break;
   }
+  if(juegoTerminado){
+    return null;
+  }
   // Después de mover, redibujamos todo el canvas para reflejar la nueva posición
   dibujarTodo();
 }
@@ -167,7 +172,10 @@ function moverDerecha(){
   let nuevoElemento = {x:0, y:0}
   // Si la cabeza se saldría del canvas hacia la derecha, no hacemos nada
   if((SERPIENTE[0].x + 2) * TAMANIO_CELDA > canvas.width)
-    return
+    {
+    gameOver();
+    return;
+  }
   // La nueva cabeza tiene X+1 (un paso a la derecha) e Y igual
   nuevoElemento.x = SERPIENTE[0].x + 1
   nuevoElemento.y = SERPIENTE[0].y
@@ -188,8 +196,10 @@ function moverIzquierda(){
   let nuevoElemento = {x:0, y:0}
   let posicionAnterior = {x: 0, y: 0} // (variable no utilizada, dejada tal cual)
   // Si la cabeza se saldría del canvas hacia la izquierda, no hacemos nada
-  if((SERPIENTE[0].x - 1) * TAMANIO_CELDA < 0)
-    return
+  if((SERPIENTE[0].x - 1) * TAMANIO_CELDA < 0){
+    gameOver();
+    return;
+  }
   // La nueva cabeza tiene X-1 (un paso a la izquierda) e Y igual
   nuevoElemento.x = SERPIENTE[0].x - 1
   nuevoElemento.y = SERPIENTE[0].y
@@ -209,8 +219,10 @@ function moverAbajo(){
   let nuevoElemento = {x:0, y:0}
   let posicionAnterior = {x: 0, y: 0} // (variable no utilizada, dejada tal cual)
   // Si la cabeza se saldría del canvas hacia abajo, no hacemos nada
-  if((SERPIENTE[0].y + 2) * TAMANIO_CELDA > canvas.height)
-    return
+  if((SERPIENTE[0].y + 2) * TAMANIO_CELDA > canvas.height){
+    gameOver();
+    return;
+  }
   // La nueva cabeza tiene X igual e Y+1 (un paso hacia abajo)
   nuevoElemento.x = SERPIENTE[0].x
   nuevoElemento.y = SERPIENTE[0].y + 1
@@ -230,8 +242,10 @@ function moverArriba(){
   let nuevoElemento = {x:0, y:0}
   let posicionAnterior = {x: 0, y: 0} // (variable no utilizada, dejada tal cual)
   // Si la cabeza se saldría del canvas hacia arriba, no hacemos nada
-  if((SERPIENTE[0].y - 1) * TAMANIO_CELDA < 0)
-    return
+  if((SERPIENTE[0].y - 1) * TAMANIO_CELDA < 0){
+    gameOver();
+    return;
+  }
   // La nueva cabeza tiene X igual e Y-1 (un paso hacia arriba)
   nuevoElemento.x = SERPIENTE[0].x
   nuevoElemento.y = SERPIENTE[0].y - 1
@@ -250,11 +264,13 @@ function moverArriba(){
 // Arranca el juego: empieza a llamar a moverSerpiente cada 500ms (2 veces por segundo)
 function iniciarJuego(){
   intervaloSerpiente = setInterval(moverSerpiente, 500);
+  cambiarEstado("Jugando");
 }
 
 // Pausa el juego: cancela el intervalo para que la serpiente deje de moverse
 function pausarJuego(){
   clearInterval(intervaloSerpiente);
+  cambiarEstado("Descanzando")
 }
 
 // Cambia la dirección de movimiento de la serpiente (se llama desde los botones del HTML)
@@ -276,4 +292,17 @@ function atraparComida(){
   }else{
     return false;
   }
+}
+
+function cambiarEstado(estado){
+  document.getElementById("estado").innerText = estado;
+}
+
+function gameOver(){
+  juegoTerminado = true
+  cambiarEstado("Game Over")
+}
+
+function reiniciarJuego(){
+  
 }
