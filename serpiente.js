@@ -467,8 +467,6 @@ window.addEventListener("keydown", function(event) {
   // Verifica si la cabeza chocó con algún obstáculo; si es así, termina el juego
   if(colisionObjetoDeDaño() == true){
     gameOver()
-    objetoDeColision.x = Math.floor(Math.random()*(canvas.width/TAMANIO_CELDA));
-    objetoDeColision.y = Math.floor(Math.random()*(canvas.height/TAMANIO_CELDA));
   }
 }
 
